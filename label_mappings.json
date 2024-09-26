@@ -1,0 +1,1 @@
+{"Gender": {"Female": 0, "Male": 1}, "Interest": {"Arts": 0, "Others": 1, "Sports": 2, "Technology": 3, "Unknown": 4}, "Personality": {"ENFJ": 0, "ENFP": 1, "ENTJ": 2, "ENTP": 3, "ESFJ": 4, "ESFP": 5, "ESTJ": 6, "ESTP": 7, "INFJ": 8, "INFP": 9, "INTJ": 10, "INTP": 11, "ISFJ": 12, "ISFP": 13, "ISTJ": 14, "ISTP": 15}}
