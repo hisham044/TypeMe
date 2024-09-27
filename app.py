@@ -164,10 +164,10 @@ def show_intro():
     st.write("""
     The MBTI (Myers-Briggs Type Indicator) is a self-report questionnaire indicating differing psychological 
     preferences in how people perceive the world and make decisions. The MBTI personality test classifies 
-    individuals into 16 distinct personality types based on their tendencies toward Introversion vs. Extraversion, 
-    Sensing vs. Intuition, Thinking vs. Feeling, and Judging vs. Perceiving.
+    individuals into 16 distinct personality types.
 
-    This app will predict your MBTI personality type based on your inputs. Click 'Start' to begin the test.
+    This app will predict your MBTI personality type based on your inputs. 
+    Click 'Start' to begin the test.
     """)
     st.button("Start", type="primary", on_click=start_test)
     
@@ -187,7 +187,7 @@ def main():
     elif st.session_state.prediction_done:
         st.title("Your Predicted Personality Type")
         input_data = predictor.collect_inputs()
-        st.write(f"**Age**: {input_data[0][0]}, **Gender**: {input_data[0][1]}, **Education**: {input_data[0][2]}, **Intoversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {input_data[0][7]}")
+        st.write(f"**Age**: {input_data[0][0]}, **Gender**: {input_data[0][1]}, **Education**: {input_data[0][2]}, **Extroversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {input_data[0][7]}")
         
         st.markdown(f"<h2 style='color: blue;'>{st.session_state.prediction}</h2>", unsafe_allow_html=True)
         
