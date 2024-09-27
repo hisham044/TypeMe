@@ -11,6 +11,11 @@ model = joblib.load('personality_classifier_xgb.pkl')
 with open('label_mappings.json', 'r') as file:
     label_mappings = json.load(file)
 
+# Load personality type descriptions
+with open('personality_descriptions.json', 'r') as file:
+    personality_descriptions = json.load(file)
+
+
 # Convert the label mappings to use in predictions
 gender_mapping = label_mappings['Gender']
 interest_mapping = label_mappings['Interest']
@@ -25,7 +30,7 @@ class PersonalityPredictor:
         if 'step' not in st.session_state:
             st.session_state.step = 0  # Start at step 0 for introduction
         if 'age' not in st.session_state:
-            st.session_state.age = 18
+            st.session_state.age = 21
         if 'gender' not in st.session_state:
             st.session_state.gender = 1
         if 'education' not in st.session_state:
@@ -57,10 +62,15 @@ class PersonalityPredictor:
         prediction = model.predict(input_data)
         return personality_mapping[prediction[0]]
 
+    def scale_score(self, score_list):
+        """Scale the combined scores of three questions to a 0-10 range."""
+        return sum(score_list) * (9.9 / 9.9)
+    
     def take_input(self):
         """Show input fields based on the current step with more intuitive prompts."""
+
         if st.session_state.step == 1:
-            st.session_state.age = st.number_input("How old are you?", min_value=18, max_value=57)
+            st.session_state.age = st.number_input("How old are you?", min_value=18, max_value=57, value=21, step=1)
 
         elif st.session_state.step == 2:
             gender = st.radio("What is your gender?", options=["Male", "Female"], horizontal=True)
@@ -72,35 +82,75 @@ class PersonalityPredictor:
                                 horizontal=True)
             st.session_state.education = 1 if education == "Graduate or Higher" else 0
 
+        # Introversion questions in separate steps | High implies Extroversion 
         elif st.session_state.step == 4:
-            st.session_state.introversion_score = st.slider(
-                "Do you find that you recharge more effectively after engaging in social gatherings (↠) or after enjoying some quiet time alone (↞)?", 
-                min_value=0.0, max_value=10.0, value=5.0)
-
+            st.session_state.introversion_q1 = st.slider("Do you enjoy spending time in large gatherings over intimate settings?", 
+                                                        min_value=0.0, max_value=1.0, value=0.5) * 3.3
         elif st.session_state.step == 5:
-            st.session_state.sensing_score = st.slider(
-                "Do you focus more on practical details (↠) or prefer to think about the big picture and abstract concepts (↞)?", 
-                min_value=0.0, max_value=10.0, value=5.0)
-
+            st.session_state.introversion_q2 = st.slider("Do you feel energized by socializing with many people?", 
+                                                        min_value=0.0, max_value=1.0, value=0.5) * 3.3
         elif st.session_state.step == 6:
-            st.session_state.thinking_score = st.slider(
-                "When making decisions, do you prioritize logic and objectivity  (↠) over personal feelings and values (↞)?", 
-                min_value=0.0, max_value=10.0, value=5.0)
+            st.session_state.introversion_q3 = st.slider("Do you prefer engaging in lively activities over quiet, reflective time alone?", 
+                                                        min_value=0.0, max_value=1.0, value=0.5) * 3.3
 
+            st.session_state.introversion_score = self.scale_score([
+                st.session_state.introversion_q1, 
+                st.session_state.introversion_q2, 
+                st.session_state.introversion_q3])
+
+        # Sensing questions in separate steps
         elif st.session_state.step == 7:
-            st.session_state.judging_score = st.slider(
-                "Do you prefer planning and sticking to schedules  (↠), or are you more comfortable going with the flow and being spontaneous (↞)?", 
-                min_value=0.0, max_value=10.0, value=5.0)
-
+            st.session_state.sensing_q1 = st.slider("Do you prefer dealing with facts over abstract concepts?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
         elif st.session_state.step == 8:
+            st.session_state.sensing_q2 = st.slider("Do you tend to notice details others might miss?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
+        elif st.session_state.step == 9:
+            st.session_state.sensing_q3 = st.slider("Do you value practical solutions over theoretical ideas?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
+            st.session_state.sensing_score = self.scale_score([
+                st.session_state.sensing_q1, 
+                st.session_state.sensing_q2, 
+                st.session_state.sensing_q3])
+
+        # Thinking questions in separate steps
+        elif st.session_state.step == 10:
+            st.session_state.thinking_q1 = st.slider("Do you prioritize logical reasoning when making decisions?", 
+                                                     min_value=0.0, max_value=1.0, value=0.5) * 3.3
+        elif st.session_state.step == 11:
+            st.session_state.thinking_q2 = st.slider("Do you find yourself focusing more on objective outcomes than personal emotions?", 
+                                                     min_value=0.0, max_value=1.0, value=0.5) * 3.3
+        elif st.session_state.step == 12:
+            st.session_state.thinking_q3 = st.slider("Do you value efficiency over maintaining harmony?", 
+                                                     min_value=0.0, max_value=1.0, value=0.5) * 3.3
+            st.session_state.thinking_score = self.scale_score([
+                st.session_state.thinking_q1, 
+                st.session_state.thinking_q2, 
+                st.session_state.thinking_q3])
+
+        # Judging questions in separate steps
+        elif st.session_state.step == 13:
+            st.session_state.judging_q1 = st.slider("Do you prefer planning things ahead of time?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
+        elif st.session_state.step == 14:
+            st.session_state.judging_q2 = st.slider("Do you feel most comfortable when following a structured routine?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
+        elif st.session_state.step == 15:
+            st.session_state.judging_q3 = st.slider("Do you find it satisfying to complete tasks before moving on?", 
+                                                    min_value=0.0, max_value=1.0, value=0.5) * 3.3
+            st.session_state.judging_score = self.scale_score([
+                st.session_state.judging_q1, 
+                st.session_state.judging_q2, 
+                st.session_state.judging_q3])
+
+        elif st.session_state.step == 16:
             interest = st.selectbox("What is your primary area of interest?", 
                                     options=["Arts", "Sports", "Technology", "Others", "Unknown"])
             st.session_state.interest = interest_mapping[interest]
 
-
     def next_step(self):
         """Go to the next step."""
-        if st.session_state.step < 8:
+        if st.session_state.step < 16:
             st.session_state.step += 1
 
     def previous_step(self):
@@ -136,7 +186,15 @@ def main():
         show_intro()
     elif st.session_state.prediction_done:
         st.title("Your Predicted Personality Type")
+        input_data = predictor.collect_inputs()
+        st.write(f"**Age**: {input_data[0][0]}, **Gender**: {input_data[0][1]}, **Education**: {input_data[0][2]}, **Intoversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {input_data[0][7]}")
+        
         st.markdown(f"<h2 style='color: blue;'>{st.session_state.prediction}</h2>", unsafe_allow_html=True)
+        
+        # Display personality description
+        description = personality_descriptions.get(st.session_state.prediction, "No description available.")
+        st.write(description)
+            
         st.write("Thank you for completing the test!")
         st.button("Restart Test", on_click=restart_test)
     else:
@@ -151,11 +209,11 @@ def main():
                 pass
 
         with col2:
-            if st.button("Next", on_click=predictor.next_step, disabled=(st.session_state.step == 8)):
+            if st.button("Next", on_click=predictor.next_step, disabled=(st.session_state.step == 16)):
                 pass        
 
         with col3:
-            if st.session_state.step == 8:
+            if st.session_state.step == 16:
                 if st.button("Predict Personality Type", type="primary"):
                     personality_type = predictor.predict()
                     st.session_state.prediction = personality_type
