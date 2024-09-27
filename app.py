@@ -189,7 +189,7 @@ def main():
         input_data = predictor.collect_inputs()
         st.write(f"**Age**: {input_data[0][0]}, **Gender**: {input_data[0][1]}, **Education**: {input_data[0][2]}, **Extroversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {input_data[0][7]}")
         
-        st.markdown(f"<h2 style='color: blue;'>{st.session_state.prediction}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='color: skyblue;'>{st.session_state.prediction}</h2>", unsafe_allow_html=True)
         
         # Display personality description
         description = personality_descriptions.get(st.session_state.prediction, "No description available.")
