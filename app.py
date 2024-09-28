@@ -15,7 +15,6 @@ with open('label_mappings.json', 'r') as file:
 with open('personality_descriptions.json', 'r') as file:
     personality_descriptions = json.load(file)
 
-
 # Convert the label mappings to use in predictions
 gender_mapping = label_mappings['Gender']
 interest_mapping = label_mappings['Interest']
@@ -50,10 +49,10 @@ class PersonalityPredictor:
 
     def collect_inputs(self):
         """Prepare the input data for model prediction."""
-        input_data = np.array([[st.session_state.age, st.session_state.gender, st.session_state.education,
+        input_data = np.array([[int(st.session_state.age), int(st.session_state.gender), int(st.session_state.education),
                                  st.session_state.introversion_score, st.session_state.sensing_score,
                                  st.session_state.thinking_score, st.session_state.judging_score,
-                                 st.session_state.interest]])
+                                 int(st.session_state.interest)]])
         return input_data
 
     def predict(self):
@@ -64,7 +63,7 @@ class PersonalityPredictor:
 
     def scale_score(self, score_list):
         """Scale the combined scores of three questions to a 0-10 range."""
-        return sum(score_list) * (9.9 / 9.9)
+        return sum(score_list) * (10 / 9.9)
     
     def take_input(self):
         """Show input fields based on the current step with more intuitive prompts."""
@@ -187,13 +186,19 @@ def main():
     elif st.session_state.prediction_done:
         st.title("Your Predicted Personality Type")
         input_data = predictor.collect_inputs()
-        st.write(f"**Age**: {input_data[0][0]}, **Gender**: {input_data[0][1]}, **Education**: {input_data[0][2]}, **Extroversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {input_data[0][7]}")
+        education = "Non Graduate" if input_data[0][2] == 0 else "Graduate"
+        gender = "Male" if input_data[0][1] == 1 else "Female"
+        interest = list(interest_mapping.keys())[list(interest_mapping.values()).index(input_data[0][7])]
+        
+        inputs = f"**Age**: {input_data[0][0]}, **Gender**: {gender}, **Education**: {education}, **Extroversion**: {input_data[0][3]}, **Sensing**: {input_data[0][4]}, **Thinking**: {input_data[0][5]}, **Judging**: {input_data[0][6]}, **Interest**: {interest}"
+        with st.expander("Show Final Inputs"):
+            st.write(inputs)
         
         st.markdown(f"<h2 style='color: skyblue;'>{st.session_state.prediction}</h2>", unsafe_allow_html=True)
         
         # Display personality description
         description = personality_descriptions.get(st.session_state.prediction, "No description available.")
-        st.write(description)
+        st.write(description)        
             
         st.write("Thank you for completing the test!")
         st.button("Restart Test", on_click=restart_test)
